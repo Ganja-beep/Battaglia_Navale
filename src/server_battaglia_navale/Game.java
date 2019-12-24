@@ -8,6 +8,7 @@ package server_battaglia_navale;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,27 +66,34 @@ public class Game {
      */
     PrintWriter output;
     
+    
     /**
      * Input dal giocatore
      */
     Scanner input;
+    
     /**
      * Socket di connessione
      */
     private Socket socket;
+    
     /**
      * Il giocatore avversario
      */
     private Giocatore opponente;
+    
     /**
      * Il nome del giocatore
      */
-    private String nomeGiocatore;
+    private String nomeGiocatore = "";
     
     /**
      * Il campo di battaglia
      */
     private int [][] griglia = new int[21][21];
+    
+    private ArrayList <Nave> ArrayNavi = new ArrayList(7);
+    
     /**
      * Creazione dell'istanza di giocatore
      * @param socket Il socket di connessione
@@ -93,12 +101,18 @@ public class Game {
     public Giocatore(Socket socket)
     {
         this.socket = socket;
+        Riempimentogriglia();
+        SetupNavi();
     }
     
     /**
      * Costruttore vuoto
      */
-    public Giocatore() {}
+    public Giocatore() 
+    {
+        Riempimentogriglia();
+        SetupNavi();
+    }
 
     /**
      * Ritorna il PrintWriter
@@ -136,7 +150,29 @@ public class Game {
         return griglia;
     }
     
+    /**
+     * Creazioni navi del giocatore
+     */
+    private void SetupNavi() {
+        ArrayNavi.add(new Nave(2));
+        ArrayNavi.add(new Nave(2));
+        ArrayNavi.add(new Nave(3));
+        ArrayNavi.add(new Nave(3));
+        ArrayNavi.add(new Nave(4));
+        ArrayNavi.add(new Nave(5));
+        }
     
+    /**
+     * Riempie la griglia ad 1 corrispondente all'acqua
+     */
+    private void Riempimentogriglia()
+    {
+        for (int i = 0; i < griglia.length; i++) {
+            for (int j = 0; j < griglia.length; j++) {
+                griglia[i][j] = 1;                
+            }
+        }
+    }
     
     /**
      *
@@ -154,19 +190,67 @@ public class Game {
         }
     }
     
+    /**
+     * Si impostano il nome e il posizionamento delle barche
+     * @throws IOException 
+     */
     private void Setup () throws IOException
     {
-        
-                                                                                                                                                                      input = new Scanner (socket.getInputStream());
+        input = new Scanner (socket.getInputStream());
         output = new PrintWriter (socket.getOutputStream(), true);
+        
         output.println("Inserisci il tuo nome: ");
         while(true)
-        if(input.hasNextLine())
         {
-            nomeGiocatore = input.nextLine();
-            break;
-        }        
+            System.out.println("------");
+            if(input.hasNextLine())
+            {
+                 System.out.println("1-----");
+                nomeGiocatore = input.nextLine();
+                System.out.println(nomeGiocatore);
+                break;
+            }      
+             System.out.println("2-----");
+        }
+     
         output.println("Ciao " + nomeGiocatore + "!!");
+        PiazzamentoNavi();
+
     }
-}
+    /**
+     * Si occupa di gestire il piazzamento delle barche.
+     * Il giocatore inserisce la coordinate x e y ed in seguito la direzione.
+     * La direzione viene espressa come 'O' (orizzontale) e 'V'(verticale).
+     */
+    private void PiazzamentoNavi()
+    {
+        int l_Posizionamento_Navi = 0;
+        while(l_Posizionamento_Navi < 7)
+        {
+            if(input.hasNextLine())
+            {
+                output.println("Inserire la coordinata x della nave lunga " + 
+                        ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
+                + ": ");
+                int x = Integer.parseInt(input.nextLine());
+                if(x < 21 && x > 0)
+                {
+                    output.println("Inserire la coordinata y: ");
+                    int y = Integer.parseInt(input.nextLine());
+                    if(y < 21 && y > 0)
+                    {
+                        output.println("Inseire orientamento della nave");
+                        String Orientamento_nave = input.nextLine();
+                        if(Orientamento_nave.equals("O") || Orientamento_nave.equals("V"))
+                        {
+                            l_Posizionamento_Navi++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    }
 }
