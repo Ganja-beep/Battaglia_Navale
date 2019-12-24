@@ -8,7 +8,6 @@ package server_battaglia_navale;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 /**
  *
  * @author informatica
@@ -18,7 +17,7 @@ public class Server_Battaglia_Navale {
     public static void main(String[] args) throws Exception {
         try (ServerSocket listener = new ServerSocket(58901)) {
             System.out.println("Il server è in esecuzione...");
-            ExecutorService pool = Executors.newFixedThreadPool(200);
+            ExecutorService pool = Executors.newFixedThreadPool(2);
             while (true) {
                 Game game = new Game();
                 pool.execute(game.new Giocatore(listener.accept()));

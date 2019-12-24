@@ -202,17 +202,13 @@ public class Game {
         output.println("Inserisci il tuo nome: ");
         while(true)
         {
-            System.out.println("------");
             if(input.hasNextLine())
             {
-                 System.out.println("1-----");
                 nomeGiocatore = input.nextLine();
-                System.out.println(nomeGiocatore);
                 break;
             }      
-             System.out.println("2-----");
         }
-     
+        System.out.println("Nome giocatore: " + nomeGiocatore);
         output.println("Ciao " + nomeGiocatore + "!!");
         PiazzamentoNavi();
 
@@ -225,30 +221,56 @@ public class Game {
     private void PiazzamentoNavi()
     {
         int l_Posizionamento_Navi = 0;
-        while(l_Posizionamento_Navi < 7)
+        int x = 0;
+        int y = 0;
+        String Orientamento_nave = "";
+        //7 sono le barche che il giocatore deve piazzare
+        while(l_Posizionamento_Navi <= 7)
         {
-            if(input.hasNextLine())
-            {
-                output.println("Inserire la coordinata x della nave lunga " + 
-                        ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
-                + ": ");
-                int x = Integer.parseInt(input.nextLine());
-                if(x < 21 && x > 0)
-                {
-                    output.println("Inserire la coordinata y: ");
-                    int y = Integer.parseInt(input.nextLine());
-                    if(y < 21 && y > 0)
-                    {
-                        output.println("Inseire orientamento della nave");
-                        String Orientamento_nave = input.nextLine();
-                        if(Orientamento_nave.equals("O") || Orientamento_nave.equals("V"))
-                        {
-                            l_Posizionamento_Navi++;
+
+            output.println("Inserire la coordinata x della nave lunga "
+                    + ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
+                    + ": ");
+            while (true) {
+                if (input.hasNextInt()) {
+                    x = input.nextInt();
+                    break;
+                }
+            }
+
+            if (x < 21 && x > 0) {
+                output.println("Inserire la coordinata y: ");
+                while (true) {
+                    if (input.hasNextInt()) {
+                        y = input.nextInt();
+                        break;
+                    }
+                    
+                }
+
+                if (y < 21 && y > 0) {
+                    output.println("Inserire orientamento della nave (O/V)");
+                    while (Orientamento_nave.isEmpty()) {
+                        if (input.hasNextLine()) {
+                            Orientamento_nave = input.nextLine();
                         }
+                    }
+                    Orientamento_nave = Orientamento_nave.toUpperCase();
+                    if (Orientamento_nave.equals("O") || Orientamento_nave.equals("V")) {
+                        //Salvataggio delle posizioni delle navi
+                        ArrayNavi.get(l_Posizionamento_Navi).setX(x);
+                        ArrayNavi.get(l_Posizionamento_Navi).setY(y);
+                        ArrayNavi.get(l_Posizionamento_Navi).setOrientamento(Orientamento_nave);
+                        l_Posizionamento_Navi++;
+                        System.out.println("e' stata piazzata la nave di lunghezza "
+                                + ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
+                                + " nelle posizioni (" + x + ", " + y + ").");
                     }
                 }
             }
+            
         }
+        output.println("fine");
     }
 
 
