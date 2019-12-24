@@ -156,6 +156,7 @@ public class Game {
     private void SetupNavi() {
         ArrayNavi.add(new Nave(2));
         ArrayNavi.add(new Nave(2));
+        ArrayNavi.add(new Nave(2));
         ArrayNavi.add(new Nave(3));
         ArrayNavi.add(new Nave(3));
         ArrayNavi.add(new Nave(4));
@@ -225,7 +226,7 @@ public class Game {
         int y = 0;
         String Orientamento_nave = "";
         //7 sono le barche che il giocatore deve piazzare
-        while(l_Posizionamento_Navi <= 7)
+        while(l_Posizionamento_Navi < 7)
         {
 
             output.println("Inserire la coordinata x della nave lunga "
@@ -261,10 +262,12 @@ public class Game {
                         ArrayNavi.get(l_Posizionamento_Navi).setX(x);
                         ArrayNavi.get(l_Posizionamento_Navi).setY(y);
                         ArrayNavi.get(l_Posizionamento_Navi).setOrientamento(Orientamento_nave);
-                        l_Posizionamento_Navi++;
+                        Orientamento_nave = "";                        
                         System.out.println("e' stata piazzata la nave di lunghezza "
                                 + ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
                                 + " nelle posizioni (" + x + ", " + y + ").");
+                        //Per piazzare la prossima nave
+                        l_Posizionamento_Navi++;
                     }
                 }
             }
