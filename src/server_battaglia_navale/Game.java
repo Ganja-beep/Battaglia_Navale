@@ -17,6 +17,8 @@ import java.util.logging.Logger;
  * Classe di gestione della partita
  * @author gange
  */
+
+
 public class Game {
     /**
      * Il giocatore che deve eseguire il turno
@@ -24,8 +26,12 @@ public class Game {
     private Giocatore GiocatoreCorrente;
     
     /**
+     * Indica se e' presente il vincitore
+     */
+    private boolean vincitore;
+    /**
      * Costruttore della classe game 
-     * @param gio il giocatore che si unisce per primo
+     * @param gio il giocatore che si unisce
      */
     public Game (Giocatore gio) 
     {
@@ -38,11 +44,65 @@ public class Game {
     public Game (){}
     
     /**
-     *
-     * @param x
-     * @param y
-     * @param gio
+     * Ritorna true se e' presente il vincitore, altrimenti false
+     * @return 
      */
+    public boolean isVincitore()
+    {return vincitore;}
+    
+    
+    /**
+     * Viene impostato il primo giocatore che deve eseguire la mossa
+     * @param c 
+     */
+    public void setGiocatoreCorrente(Giocatore c)
+    {
+        GiocatoreCorrente = c;
+    }
+    
+    /**
+     * Ritorna il giocatore che deve eseguire la mossa
+     * @return GiocatoreCorrente
+     */
+    public Giocatore getGiocatoreCorrente()
+    {
+        return GiocatoreCorrente;
+    }
+    
+    public void InserimentoBombardamento()
+    {
+        int x = 0, y = 0;
+        GiocatoreCorrente.output.println("Inserire la coordinata x del bombardamento: ");
+        
+        while(true)
+            {
+                if(GiocatoreCorrente.input.hasNextInt())
+                {
+                    x = GiocatoreCorrente.input.nextInt();
+                    if (x < 21 && x > 0) {
+                    GiocatoreCorrente.output.println("Inserire la coordinata y: ");
+                    while (true) {
+                        if (GiocatoreCorrente.input.hasNextInt()) {
+                            y = GiocatoreCorrente.input.nextInt();
+                            if(y < 21 && y > 0)
+                            break;
+                        }
+                    }
+
+                }
+            }
+            break;
+        }
+        mossa(x, y, GiocatoreCorrente);
+    }
+    
+    
+    /**
+    * Viene chiamata ad ogni mossa di ciascun giocatore
+    * @param x
+    * @param y
+    * @param gio
+    */        
     public synchronized void mossa(int x, int y, Giocatore gio)
     {
         if(gio != GiocatoreCorrente)
@@ -59,7 +119,7 @@ public class Game {
     }
     
     
-    public class Giocatore implements Runnable{
+    public class Giocatore implements Runnable {
     
     /**
      * Scrive al server
@@ -86,6 +146,11 @@ public class Game {
      * Il nome del giocatore
      */
     private String nomeGiocatore = "";
+    
+    /**
+     * Indica se il setup e' stato completato
+     */
+    private boolean setup = false;
     
     /**
      * Il campo di battaglia
@@ -115,6 +180,27 @@ public class Game {
     }
 
     /**
+     * Viene impostato l'avversario
+     * @param opponente il giocatore avversario
+     */
+    public void setOpponente(Giocatore opponente)
+    {
+        this.opponente = opponente;
+    }
+    
+    
+    /**
+     * Viene impostato il socket di comunicazione
+     * @param so il socket di comunicazione
+     * @return il giocatore da eseguire
+     */
+    public Giocatore setSocket(Socket so)
+    {
+         socket = so;
+         return this;
+    }
+    
+    /**
      * Ritorna il PrintWriter
      * @return 
      */
@@ -131,7 +217,7 @@ public class Game {
     }
 
     /**
-     * Ritorna il socket del
+     * Ritorna il socket del giocatore
      * @return 
      */
     public Socket getSocket() {
@@ -197,6 +283,7 @@ public class Game {
      */
     private void Setup () throws IOException
     {
+        System.out.println("2");
         input = new Scanner (socket.getInputStream());
         output = new PrintWriter (socket.getOutputStream(), true);
         
@@ -212,8 +299,27 @@ public class Game {
         System.out.println("Nome giocatore: " + nomeGiocatore);
         output.println("Ciao " + nomeGiocatore + "!!");
         PiazzamentoNavi();
-
+        //Il giocatore ha terminato il proprio setup
+        setup = true;
+        if(ConnessioneGiocatoreAvversario())
+        {
+            //Todo avvio della partita
+        }
+        else
+        {
+            //todo attesa del giocatore
+        }
     }
+    
+    /**
+     * Ritorna true se il setup e' finito, altrimenti false
+     * @return 
+     */
+    public boolean isSetup()
+    {
+        return setup;
+    }
+    
     /**
      * Si occupa di gestire il piazzamento delle barche.
      * Il giocatore inserisce la coordinate x e y ed in seguito la direzione.
@@ -257,7 +363,7 @@ public class Game {
                         }
                     }
                     Orientamento_nave = Orientamento_nave.toUpperCase();
-                    if (Orientamento_nave.equals("O") || Orientamento_nave.equals("V")) {
+                    if (Orientamento_nave.equals("O") || Orientamento_nave.equals("V")) { 
                         //Salvataggio delle posizioni delle navi
                         ArrayNavi.get(l_Posizionamento_Navi).setX(x);
                         ArrayNavi.get(l_Posizionamento_Navi).setY(y);
@@ -266,7 +372,7 @@ public class Game {
                         System.out.println("e' stata piazzata la nave di lunghezza "
                                 + ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
                                 + " nelle posizioni (" + x + ", " + y + ").");
-                        //Per piazzare la prossima nave
+                        //Per piazzare la nave successiva
                         l_Posizionamento_Navi++;
                     }
                 }
@@ -274,6 +380,22 @@ public class Game {
             
         }
         output.println("fine");
+
+    }
+    
+    /**
+     * Controlla se e' presente il secondo giocatore
+     */
+    private boolean ConnessioneGiocatoreAvversario() 
+    {
+        try { 
+            System.out.println(opponente.socket.isConnected());
+        }
+        catch(NullPointerException e) {
+            System.out.println("Il giocatore avversario non si e' connesso");
+            return false;
+        }
+        return opponente.socket.isConnected();
     }
 
 
