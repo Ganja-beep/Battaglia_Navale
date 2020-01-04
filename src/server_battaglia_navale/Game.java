@@ -283,7 +283,6 @@ public class Game {
      */
     private void Setup () throws IOException
     {
-        System.out.println("2");
         input = new Scanner (socket.getInputStream());
         output = new PrintWriter (socket.getOutputStream(), true);
         
@@ -303,11 +302,25 @@ public class Game {
         setup = true;
         if(ConnessioneGiocatoreAvversario())
         {
-            //Todo avvio della partita
+
+            //Nel caso il secondo giocatore fosse stato bloccato in attesa del secondo giocatore
+            synchronized(this)
+            {
+                output.println("Avvio della partita...");
+                this.notifyAll();
+            }
         }
         else
         {
-            //todo attesa del giocatore
+            
+            try {
+                    synchronized(this)
+                    {    
+                        output.println("Rimani in attesa del secondo giocatore...");
+                        this.wait();
+                    }
+            } catch (InterruptedException e)
+            {System.out.println(e.getCause());}
         }
     }
     
@@ -332,7 +345,8 @@ public class Game {
         int y = 0;
         String Orientamento_nave = "";
         //7 sono le barche che il giocatore deve piazzare
-        while(l_Posizionamento_Navi < 7)
+        ////////////////////////////////////////////////////////////////////////////
+        while(l_Posizionamento_Navi < 1)
         {
 
             output.println("Inserire la coordinata x della nave lunga "
@@ -379,6 +393,7 @@ public class Game {
             }
             
         }
+        //Avviso il giocatore che ha finito l'inserimento
         output.println("fine");
 
     }

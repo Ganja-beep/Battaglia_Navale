@@ -36,7 +36,7 @@ public class Server_Battaglia_Navale {
             
             while(game.isVincitore())
             {
-                game.
+                game.InserimentoBombardamento();
             }
             
         }
