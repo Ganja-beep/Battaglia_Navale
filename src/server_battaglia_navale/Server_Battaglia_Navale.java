@@ -30,16 +30,7 @@ public class Server_Battaglia_Navale {
             while (true) {
                 pool.execute(g1.setSocket(listener.accept()));
                 pool.execute(g2.setSocket(listener.accept()));
-                if(g1.isSetup() && g2.isSetup())
-                    break;
-            }
-            
-            while(game.isVincitore())
-            {
-                game.InserimentoBombardamento();
-            }
-            
+            }            
         }
     }
 }
-

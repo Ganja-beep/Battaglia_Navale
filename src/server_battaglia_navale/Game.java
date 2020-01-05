@@ -24,11 +24,7 @@ public class Game {
      * Il giocatore che deve eseguire il turno
      */
     private Giocatore GiocatoreCorrente;
-    
-    /**
-     * Indica se e' presente il vincitore
-     */
-    private boolean vincitore;
+
     /**
      * Costruttore della classe game 
      * @param gio il giocatore che si unisce
@@ -42,13 +38,7 @@ public class Game {
      * Costruttore vuoto
      */
     public Game (){}
-    
-    /**
-     * Ritorna true se e' presente il vincitore, altrimenti false
-     * @return 
-     */
-    public boolean isVincitore()
-    {return vincitore;}
+
     
     
     /**
@@ -69,31 +59,38 @@ public class Game {
         return GiocatoreCorrente;
     }
     
+    /**
+     * IL giocatore inserisce la posizione da bombardare
+     */
     public void InserimentoBombardamento()
     {
         int x = 0, y = 0;
-        GiocatoreCorrente.output.println("Inserire la coordinata x del bombardamento: ");
+        System.out.println("Turno di " + GiocatoreCorrente.nomeGiocatore);
+
         
         while(true)
             {
+                GiocatoreCorrente.output.println("Inserire la coordinata x del bombardamento: ");
                 if(GiocatoreCorrente.input.hasNextInt())
                 {
                     x = GiocatoreCorrente.input.nextInt();
-                    if (x < 21 && x > 0) {
+                    if (x < 21 && x > -1) {
                     GiocatoreCorrente.output.println("Inserire la coordinata y: ");
                     while (true) {
-                        if (GiocatoreCorrente.input.hasNextInt()) {
+                        if (GiocatoreCorrente.input.hasNextInt()) 
+                        {
                             y = GiocatoreCorrente.input.nextInt();
-                            if(y < 21 && y > 0)
-                            break;
+                            if(y < 21 && y > -1)
+                            {
+                                mossa(x, y);
+                                break;
+                            }
                         }
                     }
-
                 }
             }
-            break;
+
         }
-        mossa(x, y, GiocatoreCorrente);
     }
     
     
@@ -103,20 +100,35 @@ public class Game {
     * @param y
     * @param gio
     */        
-    public synchronized void mossa(int x, int y, Giocatore gio)
+    public synchronized void mossa(int x, int y)
     {
-        if(gio != GiocatoreCorrente)
-        {
-            throw new IllegalStateException("Non è il tuo turno");
-        } 
-        else if (GiocatoreCorrente.getOpponente() == null)
+        if (GiocatoreCorrente.getOpponente() == null)
         {
             throw new IllegalStateException("Non è presente nessuno avversario");
         }
-        else if (GiocatoreCorrente.getGriglia() [x][y] == 1)
+        else if(GiocatoreCorrente.opponente.getGriglia() [x][y] == 0)
+        {
+            GiocatoreCorrente.output.println("Acqua...ritenta al prossimo turno");
+        }
+        else if (GiocatoreCorrente.opponente.getGriglia() [x][y] == 1)
             throw new IllegalStateException("La posizione è già stata bombardata");
-        //TODO controllo del colpo se colpito o no e cambio dei turni
+        else if (GiocatoreCorrente.opponente.getGriglia() [x][y] == 2)
+        {
+            //Corrisponde ad una posizione gia bombardata
+            GiocatoreCorrente.opponente.getGriglia() [x][y] = 1;
+            GiocatoreCorrente.output.println("Hai colpito una nave");
+            GiocatoreCorrente.opponente.tot_barche--;
+            if(GiocatoreCorrente.opponente.tot_barche == 0)
+               FinePartita();
+        }
+        GiocatoreCorrente = GiocatoreCorrente.opponente;
     }
+    
+     private void FinePartita()
+     {
+         GiocatoreCorrente.opponente.output.println("perso");
+         GiocatoreCorrente.output.println("vinto");
+     }
     
     
     public class Giocatore implements Runnable {
@@ -157,7 +169,15 @@ public class Game {
      */
     private int [][] griglia = new int[21][21];
     
+    /**
+     * La lista delle navi
+     */
     private ArrayList <Nave> ArrayNavi = new ArrayList(7);
+    
+    /**
+     * 
+     */
+    private int tot_barche = 2;
     
     /**
      * Creazione dell'istanza di giocatore
@@ -256,7 +276,7 @@ public class Game {
     {
         for (int i = 0; i < griglia.length; i++) {
             for (int j = 0; j < griglia.length; j++) {
-                griglia[i][j] = 1;                
+                griglia[i][j] = 0;                
             }
         }
     }
@@ -269,12 +289,18 @@ public class Game {
         try {
             Setup();
         } catch (IOException ex) {
-            Logger.getLogger(Giocatore.class.getName()).log(Level.SEVERE, null, ex);
-        } finally
+            System.out.println("Errore nell'impostazione della partita");
+        } /**finally
         {
             if(opponente != null && opponente.output != null)
                 output.println("L'altro giocatore è uscito");
-        }
+        }        **/
+        while(true)
+            if(this.isSetup() && opponente.isSetup())
+            {
+                System.out.println("Inizio partita");
+                Game.this.InserimentoBombardamento();
+            }
     }
     
     /**
@@ -300,7 +326,7 @@ public class Game {
         PiazzamentoNavi();
         //Il giocatore ha terminato il proprio setup
         setup = true;
-        if(ConnessioneGiocatoreAvversario())
+        if(ConnessioneGiocatoreAvversario() && opponente.isSetup())
         {
 
             //Nel caso il secondo giocatore fosse stato bloccato in attesa del secondo giocatore
@@ -359,7 +385,7 @@ public class Game {
                 }
             }
 
-            if (x < 21 && x > 0) {
+            if (x < 21 && x > -1) {
                 output.println("Inserire la coordinata y: ");
                 while (true) {
                     if (input.hasNextInt()) {
@@ -369,7 +395,7 @@ public class Game {
                     
                 }
 
-                if (y < 21 && y > 0) {
+                if (y < 21 && y > -1) {
                     output.println("Inserire orientamento della nave (O/V)");
                     while (Orientamento_nave.isEmpty()) {
                         if (input.hasNextLine()) {
@@ -382,12 +408,20 @@ public class Game {
                         ArrayNavi.get(l_Posizionamento_Navi).setX(x);
                         ArrayNavi.get(l_Posizionamento_Navi).setY(y);
                         ArrayNavi.get(l_Posizionamento_Navi).setOrientamento(Orientamento_nave);
+                        //Chiamata metodo di posizionamento delle navi
+                        //Per piazzare la nave successiva
+                        //true se piazza correttamente altrimenti false
+                        if(posizionamentoNave(ArrayNavi.get(l_Posizionamento_Navi).getLunghezza(),
+                        x, y, Orientamento_nave))
+                        {
+                            l_Posizionamento_Navi++;
+                        }
                         Orientamento_nave = "";                        
-                        System.out.println("e' stata piazzata la nave di lunghezza "
+                        System.out.println(nomeGiocatore + " ha piazzato la nave di lunghezza "
                                 + ArrayNavi.get(l_Posizionamento_Navi).getLunghezza()
                                 + " nelle posizioni (" + x + ", " + y + ").");
-                        //Per piazzare la nave successiva
-                        l_Posizionamento_Navi++;
+
+
                     }
                 }
             }
@@ -395,7 +429,60 @@ public class Game {
         }
         //Avviso il giocatore che ha finito l'inserimento
         output.println("fine");
+        VisualizzazioneFormazione(nomeGiocatore);
 
+    }
+    
+    /**
+     * Visualizza la griglia delle navi del giocatore
+     * @param nome il nome del giocatore
+     */
+    private void VisualizzazioneFormazione(String nome)
+    {
+        System.out.println("Griglia giocatore: " + nome);
+        for (int i = 0; i < 21; i++) {
+            System.out.println("");
+            for (int j = 0; j < 21; j++) {
+                System.out.print(" " + griglia[i][j]);
+            }
+        }
+        System.out.println("");
+    }
+    
+    /**
+     * Posiziona per intero la nave
+     * @param lunghezzaNave lunghezza della nave
+     * @param posX la posizione x scelta dal giocatore 
+     * @param posY la posizione y scelta dal giocatore
+     * @param Orientamento orientamento scelto dal giocatore
+     * @return true se posizionata correttamente, altrimenti false
+     */
+    private boolean posizionamentoNave(int lunghezzaNave, int posX, int posY, String Orientamento)
+    {
+        griglia[posX][posY] = 2;
+        if(Orientamento.equals("O"))
+        {
+            //Se la differenza e' maggiore di 0 e' possibile piazzare la nave, perche' altrimenti uscirebbe dalla griglia
+            if((posY + lunghezzaNave) < 21)
+            {   
+                for (int i = 1; i < lunghezzaNave; i++) {
+                        posY++;
+                        griglia[posX][posY] = 2;
+                }
+                System.out.println(nomeGiocatore + " nave posizionata correttamente");
+                return true;
+            }
+        }
+            else if((posX + lunghezzaNave) < 21)
+            {
+                for (int i = 1; i < lunghezzaNave; i++) {
+                    posX++;
+                    griglia[posX][posY] = 2;
+                }
+                System.out.println(nomeGiocatore + " nave posizionata correttamente");
+                return true;
+            }
+        return false;
     }
     
     /**
@@ -404,7 +491,7 @@ public class Game {
     private boolean ConnessioneGiocatoreAvversario() 
     {
         try { 
-            System.out.println(opponente.socket.isConnected());
+            System.out.println("Connessione giocatore: " + opponente.nomeGiocatore+ " - " + opponente.socket.isConnected());
         }
         catch(NullPointerException e) {
             System.out.println("Il giocatore avversario non si e' connesso");
