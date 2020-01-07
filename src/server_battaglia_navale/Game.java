@@ -10,8 +10,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Classe di gestione della partita
@@ -114,16 +112,20 @@ public class Game {
             throw new IllegalStateException("La posizione è già stata bombardata");
         else if (GiocatoreCorrente.opponente.getGriglia() [x][y] == 2)
         {
-            //Corrisponde ad una posizione gia bombardata
             GiocatoreCorrente.opponente.getGriglia() [x][y] = 1;
             GiocatoreCorrente.output.println("Hai colpito una nave");
             GiocatoreCorrente.opponente.tot_barche--;
             if(GiocatoreCorrente.opponente.tot_barche == 0)
                FinePartita();
         }
+        //Cambia il turno
         GiocatoreCorrente = GiocatoreCorrente.opponente;
+        System.out.println("Turno di " +  GiocatoreCorrente.nomeGiocatore);
     }
     
+     /**
+      * Manda un messaggio di quale giocatore ha vinto
+      */
      private void FinePartita()
      {
          GiocatoreCorrente.opponente.output.println("perso");
@@ -280,21 +282,15 @@ public class Game {
             }
         }
     }
-    
-    /**
-     *
-     */
+
     @Override
     public void run() {
         try {
             Setup();
         } catch (IOException ex) {
             System.out.println("Errore nell'impostazione della partita");
-        } /**finally
-        {
-            if(opponente != null && opponente.output != null)
-                output.println("L'altro giocatore è uscito");
-        }        **/
+        }
+        
         while(true)
             if(this.isSetup() && opponente.isSetup())
             {
@@ -371,8 +367,7 @@ public class Game {
         int y = 0;
         String Orientamento_nave = "";
         //7 sono le barche che il giocatore deve piazzare
-        ////////////////////////////////////////////////////////////////////////////
-        while(l_Posizionamento_Navi < 1)
+        while(l_Posizionamento_Navi < 7)
         {
 
             output.println("Inserire la coordinata x della nave lunga "
