@@ -177,9 +177,9 @@ public class Game {
     private ArrayList <Nave> ArrayNavi = new ArrayList(7);
     
     /**
-     * 
+     * Numero di spazi occupati dalle barche
      */
-    private int tot_barche = 2;
+    private int tot_barche = 21;
     
     /**
      * Creazione dell'istanza di giocatore
@@ -214,12 +214,10 @@ public class Game {
     /**
      * Viene impostato il socket di comunicazione
      * @param so il socket di comunicazione
-     * @return il giocatore da eseguire
      */
-    public Giocatore setSocket(Socket so)
+    public void setSocket(Socket so)
     {
          socket = so;
-         return this;
     }
     
     /**

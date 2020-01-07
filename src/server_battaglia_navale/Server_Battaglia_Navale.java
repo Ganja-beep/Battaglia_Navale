@@ -20,16 +20,16 @@ public class Server_Battaglia_Navale {
             System.out.println("Il server è in esecuzione...");
             ExecutorService pool = Executors.newFixedThreadPool(2);
             Game game = new Game();
-            Giocatore g1 = game.new Giocatore();
+            Giocatore g1 = game.new Giocatore(listener.accept());
             System.out.println("Creato primo giocatore");
-            Giocatore g2 = game.new Giocatore();
+            Giocatore g2 = game.new Giocatore(listener.accept());
             System.out.println("Creato secondo giocatore");
             g1.setOpponente(g2);
             g2.setOpponente(g1);
             game.setGiocatoreCorrente(g1);
             while (true) {
-                pool.execute(g1.setSocket(listener.accept()));
-                pool.execute(g2.setSocket(listener.accept()));
+                pool.execute(g1);
+                pool.execute(g2);
             }            
         }
     }
